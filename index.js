@@ -13,15 +13,20 @@ app.post("/webhook", async (req, res) => {
   const userMessage = req.body.events[0].message.text;
 
   try {
-    const response = await axios.post(`${AZURE_OPENAI_ENDPOINT}`, {
-      headers: {
-        Authorization: `Bearer ${AZURE_OPENAI_KEY}`,
-        "Content-Type": "application/json",
+    const response = await axios.post(
+      AZURE_OPENAI_ENDPOINT,
+      {
+        messages: [{ role: "user", content: userMessage }],
       },
-      data: { prompt: userMessage },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${AZURE_OPENAI_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const reply = response.data.choices[0].text;
+    const reply = response.data.choices[0].message.content;
     await axios.post(
       "https://api.line.me/v2/bot/message/reply",
       {
